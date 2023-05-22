@@ -11,14 +11,15 @@ typedef struct MSJ{
     char fecha[11]; // "YYYY-MM-DD" (10 caracteres + 1 para el terminador nulo)
     char hora[9]; // "HH:MM:SS" (8 caracteres + 1 para el terminador nulo)
     int linea;
+    int is;
 } MSJ;
 
 // Esta estructura se utilizará para las configuraciones de los writers y readers
 typedef struct Settings{
 	int sleeping;       	
 	int actor;
-    int sem_id;
-    MSJ *shared_memory;
+    	int sem_id;
+    	MSJ *shared_memory;
 } Settings;
 
  
@@ -46,22 +47,26 @@ void update_bitacora(const char* message, char* action) {
     fclose(file);
 }
 
-// Llenamos la cadena de fecha con la fecha actual
-void obtenerFecha(char* fecha, size_t tam) {
-    time_t tiempo;
-    struct tm* tiempo_local;
-    tiempo = time(NULL);
-    tiempo_local = localtime(&tiempo);
-    strftime(fecha, tam, "%Y-%m-%d", tiempo_local);
-}
-
-// Llenamos la cadena de hora con la hora actual
-void obtenerHora(char* hora, size_t tam) {
-    time_t tiempo;
-    struct tm* tiempo_local;
-    tiempo = time(NULL);
-    tiempo_local = localtime(&tiempo);    
-    strftime(hora, tam, "%H:%M:%S", tiempo_local);
+// Llenamos la cadena de fecha con la fecha actual 
+char* obtenerFecha() { 
+    char* fecha = (char*)malloc(11 * sizeof(char)); 
+    time_t tiempo; 
+    struct tm* tiempo_local; 
+    tiempo = time(NULL); 
+    tiempo_local = localtime(&tiempo); 
+    strftime(fecha, 11, "%Y-%m-%d", tiempo_local); 
+    return fecha; 
+} 
+ 
+// Llenamos la cadena de hora con la hora actual 
+char* obtenerHora() { 
+    char* hora = (char*)malloc(9 * sizeof(char)); 
+    time_t tiempo; 
+    struct tm* tiempo_local; 
+    tiempo = time(NULL); 
+    tiempo_local = localtime(&tiempo); 
+    strftime(hora, 9, "%H:%M:%S", tiempo_local); 
+    return hora; 
 }
 
 #endif

@@ -27,24 +27,20 @@
 #define action "Reader-Egoista"
 
 int main(int argc, char *argv[]) {    
-    if (argc != 2) {
-        printf("Uso: %s <num_readers_ego> <sleeping> <reading>\n", argv[0]);
+    
+    // Obtener el ID de la memoria compartida--------
+    int shm_id = shmget(SHM_KEY, 0, 0);
+    if (shm_id == -1) {
+        perror("Error al obtener el ID de la memoria compartida");
+        return 1;
+    }    
+    MSJ *shared_memory = (MSJ *)shmat(shm_id, NULL, 0);
+    if (shared_memory == (MSJ *)-1) {
+        perror("Error al adjuntar la memoria compartida");
         return 1;
     }
-    
-    int num_readers_ego = atoi(argv[1]);
-    int sleeping = atoi(argv[2]);
-    int reading = atoi(argv[3]);
-    
-    /*
-    No permitir que más de 3 readers egoístas tengan acceso a la memoria
-    compartida de manera consecutiva. Si se presenta esta situación la memoria compartida
-    debe ser entregado a algún otro proceso que esté compitiendo por él. SI no hay nadie más
-    podrán seguir leyendo los egoístas hasta que alguien solicite el recurso
-
-    */
-    
-    printf("Inicialización completa. El programa inicializador terminará.\n");
-    
+    for (int i = 0; i < 5; i++) {
+    	printf("vect %d \n",shared_memory[i].pid);
+    }
     return 0;
 }

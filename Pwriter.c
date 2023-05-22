@@ -39,33 +39,40 @@ void *writer(void *arg){
     MSJ *msj = (MSJ *)malloc(sizeof(MSJ));
     msj->pid = getpid();
 
-    char fecha[11];  // Suficiente espacio para "YYYY-MM-DD" + el carácter nulo
-    char hora[9];    // Suficiente espacio para "HH:MM:SS" + el carácter nulo
+    char *fecha;  // Suficiente espacio para "YYYY-MM-DD" + el carácter nulo
+    char *hora;    // Suficiente espacio para "HH:MM:SS" + el carácter nulo
 
-            printf("Writer looking for space 2 \n");
     while (true)
     {
         // Bloqueo el acceso a la memoria compartida
         semop(sem_id, &wait_operation1, 1);
-        
         // Escribo en la memoria compartida
 
             // Obtener y mostrar la fecha
-            obtenerFecha(fecha, sizeof(fecha));
+            fecha = obtenerFecha();
             // Obtener y mostrar la hora
-            obtenerHora(hora, sizeof(hora));   
+            hora = obtenerHora();   
 
             // Ver que linea de la memoria compartida esta disponible y escribir
             int i = 0;
 
- printf("Writer looking for space 3.2 \n");
-            while (i < vectores)
+	    MSJ *tmp_shared_memory = shared_memory;
+	    
+     	    int vectores = 0;
+            while (tmp_shared_memory[i].is == 1)
             {
-                if(&shared_memory[i].pid != NULL)
-	       		printf("No es nulo \n");		
+            	vectores++;	      			
                 i++;
             }
- printf("Writer looking for space 3.3 \n");       
+               printf("vectORES %d \n",vectores);
+            i = 0;
+            while (i < vectores)
+            {
+                if(tmp_shared_memory[i].pid == -1){
+	      		break;		
+	      	}	      			
+                i++;
+            }    
  
             if (i == vectores)
             {
@@ -76,10 +83,10 @@ void *writer(void *arg){
 	        msj->linea = i;
                 strcpy(msj->fecha, fecha);
                 strcpy(msj->hora, hora);
-                printf("\e[92;1m: Escribiendo en la linea %d fecha %s hora %s ]\n", msj->linea, msj->fecha, msj->hora);
+                msj->is = 1;
+                tmp_shared_memory[i] = *msj;
+                printf("\e[92;1m Escribiendo en la linea %d fecha %s hora %s ]\n", msj->linea, msj->fecha, msj->hora);
             }
-
-
 
         // Tiempo que tarda en escribir
         sleep(writing);
@@ -131,10 +138,10 @@ int main(int argc, char *argv[]) {
     sett->sem_id = sem_id;
     int i = 0;
      
+     //printf("vect %d \n",shared_memory[0].pid);
+     
     while ( i < num_writers)
     {
-    
-
         pthread_t writ_thread;
         if(pthread_create(&writ_thread, NULL, &writer, (void*)sett) != 0){
             printf("\e[91;103;1m Error pthread writer\e[0m\n");

@@ -26,7 +26,9 @@
 #define SEM_KEY 9999
 #define action "Reader"
 
-void *writer(void *arg){
+
+    
+void *reader(void *arg){
     Settings * sett = (Settings *)arg;
     int sleeping = sett->sleeping;
     int reading = sett->actor;
@@ -41,7 +43,9 @@ void *writer(void *arg){
 
     char *fecha;  // Suficiente espacio para "YYYY-MM-DD" + el carácter nulo
     char *hora;    // Suficiente espacio para "HH:MM:SS" + el carácter nulo
+    
     int linea = 0;
+    
     while (true)
     {        
         // Bloqueo el acceso a la memoria compartida
@@ -79,14 +83,19 @@ void *writer(void *arg){
                 // Obtener y mostrar la hora
                 hora = obtenerHora();   
                 linea = i;
-	            msj->linea = i;
-                strcpy(msj->fecha, fecha);
-                strcpy(msj->hora, hora);
-                msj->is = 1;
+                
+                msj->pid = tmp_shared_memory[i].pid;
+	        msj->linea = tmp_shared_memory[i].linea;
+                strcpy(msj->fecha, tmp_shared_memory[i].fecha);
+                strcpy(msj->hora, tmp_shared_memory[i].hora);
+
                 update_bitacora( msj, action);
                 printf("\e[92;1m Leyendo la linea %d fecha %s hora %s \n", msj->linea, msj->fecha, msj->hora);
                 // Tiempo que tarda en leer
                 sleep(reading);
+                linea++;
+                if (linea == vectores)
+			linea = 0;
             }
         // Duerme el lector
         sleep(sleeping);

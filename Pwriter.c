@@ -76,7 +76,7 @@ void *writer(void *arg){
  
             if (i == vectores)
             {
-                printf("\e[92;1m: El writer %d no encuentra espacio \n", msj->pid);
+                printf("\e[92;1m: El writer %ld no encuentra espacio \n", msj->pid);
             }
             else
             {

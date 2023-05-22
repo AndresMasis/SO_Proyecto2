@@ -63,7 +63,7 @@ int main() {
         perror("Error al abrir el archivo de bitácora");
         return 1;
     }
-    fprintf(file, " \n \t### --- EXECUTION ENDED --- ### ");    
+    fprintf(bitacora, " \n \t### --- EXECUTION ENDED --- ### ");    
     fclose(bitacora);
 
    

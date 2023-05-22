@@ -21,6 +21,8 @@
 #include <sys/sem.h>
 // Mensajes
 #include "Message.h"
+// Spy
+#include "Spy.h"
 
 #define SHM_KEY 1234
 #define SEM_KEY 9999
@@ -39,6 +41,18 @@ int main() {
         return 1;
     }
     
+    // Obtener el ID de la memoria compartida SPY---------------------------------------
+    int shm_id_spy = shmget(HEAD, 0, 0);
+    if (shm_id_spy == -1) {
+        perror("Error al obtener el ID de la memoria compartida SPY");
+        return 1;
+    }    
+    // Desvincular y eliminar la memoria compartida SPY
+    if (shmctl(shm_id_spy, IPC_RMID, NULL) == -1) {
+        perror("Error al eliminar la memoria compartida SPY");
+        return 1;
+    }
+
     // Obtener el ID del conjunto de semáforos---------------------------------------
     int sem_id = semget(SEM_KEY, 0, 0);
     if (sem_id == -1) {
@@ -51,14 +65,12 @@ int main() {
         return 1;
     }
     
-    
+    /*
 
     // Eliminar  procesos  ------------------------------------------------------------------------------
-    system("killall Pwriter");
-    system("killall Preader");
-    system("killall PreaderEgo");
+    system("killall init");
 
-    
+    */
     // Cerrar el archivo de bitácora------------------------------------------------------------------------------
     FILE *bitacora = fopen("bitacora.txt", "a");
     if (bitacora == NULL) {

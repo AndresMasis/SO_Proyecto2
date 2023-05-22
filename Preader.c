@@ -27,7 +27,7 @@
 #define action "Reader"
 
 int main(int argc, char *argv[]) {    
-    if (argc != 2) {
+    if (argc != 4) {
         printf("Uso: %s <num_readers> <sleeping> <reading>\n", argv[0]);
         return 1;
     }

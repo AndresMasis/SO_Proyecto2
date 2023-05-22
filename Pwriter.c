@@ -41,7 +41,7 @@ void *writer(void *arg){
 }
 
 int main(int argc, char *argv[]) {    
-    if (argc != 2) {
+    if (argc != 4) {
         printf("Uso: %s <num_writers> <sleeping> <writing>\n", argv[0]);
         return 1;
     }

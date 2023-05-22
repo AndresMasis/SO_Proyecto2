@@ -98,7 +98,8 @@ int main(int argc, char *argv[]) {
     if (bitacora == NULL) {
         perror("Error al abrir el archivo de bitácora");
         return 1;
-    }    
+    }        
+    fprintf(file, " \n \t### --- EXECUTION START --- ### ");    
     fclose(bitacora);   
 
     printf("Inicialización completa. El programa inicializador terminará.\n");

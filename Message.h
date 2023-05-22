@@ -1,8 +1,10 @@
 #ifndef MESSAGE_H
 #define MESSAGE_H
 
-// Estructura del msj
+// Estructuras
 
+
+// Esta estructura se utilizará para almacenar los mensajes en la memoria compartida
 typedef struct MSJ{
     int pid;
     char fecha[11]; // "YYYY-MM-DD" (10 caracteres + 1 para el terminador nulo)
@@ -10,6 +12,15 @@ typedef struct MSJ{
     int linea;
     char mensaje[200];
 } MSJ;
+
+// Esta estructura se utilizará para las configuraciones de los writers y readers
+typedef struct Settings{
+	int sleeping;       	
+	int actor;
+    MSJ *shared_memory;
+} Settings;
+
+ 
 
 // ------------------------------------------------------------------------------------------Funciones
 

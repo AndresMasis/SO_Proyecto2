@@ -1,6 +1,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+// Manejo de cadenas
+#include <string.h>
+// Tipos de datos
+#include <ctype.h>
+#include <limits.h>
+// Interfaz
+#include <ncurses.h>  //ADD AT THE END OF COMPILING THE FILE -lncurses
+// Hilos
+#include <pthread.h>
+// Errores
+#include <errno.h>
+// Tiempo
+#include <time.h>
 // Memoria compartida
 #include <sys/ipc.h>
 #include <sys/shm.h>

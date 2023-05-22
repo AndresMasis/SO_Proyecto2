@@ -1,6 +1,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+// Manejo de cadenas
+#include <string.h>
+// Tipos de datos
+#include <ctype.h>
+#include <limits.h>
+// Interfaz
+#include <ncurses.h>  //ADD AT THE END OF COMPILING THE FILE -lncurses
+// Hilos
+#include <pthread.h>
+// Errores
+#include <errno.h>
+// Tiempo
+#include <time.h>
 // Memoria compartida
 #include <sys/ipc.h>
 #include <sys/shm.h>
@@ -58,16 +71,18 @@ int main(int argc, char *argv[]) {
     
      // SEMAFOROS --------------------------------------------------------------------------------
      // 0: Memoria ( el primer semaforo es para la memoria compartida si se puede acceder o no)
-     // 1: Lectores
-    int sem_id = semget(SEM_KEY, 3, IPC_CREAT | 0666);
+     // 1: Lectores Egoistas
+
+    int sem_id = semget(SEM_KEY, 2, IPC_CREAT | 0666);
     if (sem_id == -1) {
         perror("Error al crear el conjunto de semáforos");
         return 1;
     }
     // Inicializar los semáforos contadores con valores específicos
     union semun arg;
-    unsigned short values[3] = {1, 2, 3};  // Valores iniciales para los semáforos, este valor es la cantidad de procesos que pueden acceder a la memoria compartida al mismo tiempo 
+    unsigned short values[3] = {1,3};  // Valores iniciales para los semáforos, este valor es la cantidad de procesos que pueden acceder a la memoria compartida al mismo tiempo 
     arg.array = values;
+
     if (semctl(sem_id, 0, SETALL, arg) == -1) {
         perror("Error al inicializar los semáforos contadores");
         return 1;
@@ -212,6 +227,3 @@ int main() {
 
 
 */
-
-
-

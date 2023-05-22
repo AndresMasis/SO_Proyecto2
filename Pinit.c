@@ -50,13 +50,14 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     
+    /*
     // Adjuntar la memoria compartida
     MSJ *shared_memory = (MSJ *)shmat(shm_id, NULL, 0);
     if (shared_memory == (MSJ *)-1) {
         perror("Error al adjuntar la memoria compartida");
         return 1;
     }
-    
+    */
     // Inicializar la memoria compartida
     for (int i = 0; i < num_vectors; i++) {
         // Inicializar los valores de los vectores/líneas como desees

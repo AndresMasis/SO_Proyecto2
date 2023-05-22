@@ -72,6 +72,7 @@ void *writer(void *arg){
                 msj->linea = i;
                 strcpy(msj->fecha, fecha);
                 strcpy(msj->hora, hora);
+                printf("\e[92;1m: Escribiendo en la linea %d fecha %s hora %s \n", msj->linea, msj->fecha, msj->hora);
             }
 
         // Tiempo que tarda en escribir

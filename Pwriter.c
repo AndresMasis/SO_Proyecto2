@@ -37,7 +37,7 @@ void *writer(void *arg){
     struct sembuf signal_operation1 = {0, 1, 0};  // Operación de señal 
 
     MSJ *msj = (MSJ *)malloc(sizeof(MSJ));
-    msj->pid = getpid();
+    msj->pid = (long)pthread_self();
 
     char *fecha;  // Suficiente espacio para "YYYY-MM-DD" + el carácter nulo
     char *hora;    // Suficiente espacio para "HH:MM:SS" + el carácter nulo
@@ -85,7 +85,7 @@ void *writer(void *arg){
                 strcpy(msj->hora, hora);
                 msj->is = 1;
                 tmp_shared_memory[i] = *msj;
-                update_bitacora( *msj, action)
+                update_bitacora( msj, action);
                 printf("\e[92;1m Escribiendo en la linea %d fecha %s hora %s ]\n", msj->linea, msj->fecha, msj->hora);
             }
 

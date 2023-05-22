@@ -7,7 +7,7 @@ int vectores;
 
 // Esta estructura se utilizará para almacenar los mensajes en la memoria compartida
 typedef struct MSJ{
-    int pid;
+    long pid;
     char fecha[11]; // "YYYY-MM-DD" (10 caracteres + 1 para el terminador nulo)
     char hora[9]; // "HH:MM:SS" (8 caracteres + 1 para el terminador nulo)
     int linea;
@@ -43,7 +43,7 @@ void update_bitacora(MSJ* mess, char* action) {
     local_time = localtime(&current_time);    
     strftime(formatted_time, sizeof(formatted_time), "%Y-%m-%d %H:%M:%S", local_time);
         
-    fprintf(file, "PID: %d, Action: %s, Time: %s, \n \t Message:[PID: %d FECHA: %s HORA: %s LINEA: %d] \n", pid, action, formatted_time, mess->pid, mess->fecha, mess->hora, mess->linea);
+    fprintf(file, "PID: %d, Action: %s, Time: %s, \n \t Message:[PID: %ld FECHA: %s HORA: %s LINEA: %d] \n", pid, action, formatted_time, mess->pid, mess->fecha, mess->hora, mess->linea);
     
     fclose(file);
 }

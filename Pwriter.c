@@ -31,10 +31,56 @@ void *writer(void *arg){
     Settings * sett = (Settings *)arg;
     int sleeping = sett->sleeping;
     int writing = sett->actor;
+    MSJ *shared_memory = sett->shared_memory;
+    int sem_id = sett->sem_id;
 
-    printf("Writer %d: Iniciando\n", writing);
-    sleep(sleeping);
-    printf("Writer %d: Terminando\n", writing);
+    struct sembuf wait_operation1 = {0, -1, 0};  // Operación de espera 
+    struct sembuf signal_operation1 = {0, 1, 0};  // Operación de señal 
+
+    MSJ *msj = (MSJ *)malloc(sizeof(MSJ));
+    msj->pid = getpid();
+
+    char fecha[11];  // Suficiente espacio para "YYYY-MM-DD" + el carácter nulo
+    char hora[9];    // Suficiente espacio para "HH:MM:SS" + el carácter nulo
+
+    while (true)
+    {
+        // Bloqueo el acceso a la memoria compartida
+        semop(sem_id, &wait_operation1, 1);
+        // Escribo en la memoria compartida
+
+            // Obtener y mostrar la fecha
+            obtenerFecha(fecha, sizeof(fecha));
+            // Obtener y mostrar la hora
+            obtenerHora(hora, sizeof(hora));   
+
+            // Ver que linea de la memoria compartida esta disponible y escribir
+            int i = 0;
+            int flag = 1;
+
+            while (shared_memory[i] != NULL && i < vectores)
+            {
+                i++;
+            }
+       
+            if (i == vectores)
+                flag = 0;
+            else
+                flag = 1;
+
+            if (flag){
+                msj->linea = i;
+                strcpy(msj->fecha, fecha);
+                strcpy(msj->hora, hora);
+            }
+
+        // Tiempo que tarda en escribir
+        sleep(writing);
+        // Libero la memoria compartida
+        semop(sem_id, &signal_operation1, 1);
+        // Duerme el writer
+        sleep(sleeping);
+    }
 
     pthread_exit(NULL);    
 	pthread_detach(pthread_self());
@@ -61,11 +107,18 @@ int main(int argc, char *argv[]) {
         perror("Error al adjuntar la memoria compartida");
         return 1;
     }
+     // Obtener el ID del conjunto de semáforos-----
+    int sem_id = semget(SEM_KEY, 0, 0);
+    if (sem_id == -1) {
+        perror("Error al obtener el ID del conjunto de semáforos");
+        return 1;
+    }
 
     Settings * sett = (Settings *)malloc(sizeof(Settings));
     sett->sleeping = sleeping;
     sett->actor = writing;
     sett->shared_memory = shared_memory;
+    sett->sem_id = sem_id;
     int i = 0;
     while ( i < num_writers)
     {
@@ -76,8 +129,6 @@ int main(int argc, char *argv[]) {
         }
         i++;
     }
-
-    printf("Writers Creados.\n");
     
     while (true)
     {

@@ -41,7 +41,8 @@ int main(int argc, char *argv[]) {
         return 1;
     }    
     num_vectors = atoi(argv[1]);
-
+    vectores = num_vectors;
+    
     // Crear la memoria compartida
     // num vectors * sizeof(MSJ)
     int shm_id = shmget(SHM_KEY, num_vectors * sizeof(MSJ), IPC_CREAT | 0666);
@@ -55,13 +56,6 @@ int main(int argc, char *argv[]) {
     if (shared_memory == (MSJ *)-1) {
         perror("Error al adjuntar la memoria compartida");
         return 1;
-    }
-
-    /*
-    // Inicializar la memoria compartida
-    for (int i = 0; i < num_vectors; i++) {
-        // Inicializar los valores de los vectores/líneas como desees
-        shared_memory[i] = i;
     }
     
     */
@@ -206,26 +200,26 @@ int main() {
 /*  --------------------------------------------------------------------Como usar los semaforos
 
   // Realizar operaciones de espera y señal en los semáforos
+ // Realizar operaciones de espera y señal en los semáforos
     struct sembuf wait_operation1 = {0, -1, 0};  // Operación de espera en el semáforo 1
     struct sembuf signal_operation1 = {0, 1, 0};  // Operación de señal en el semáforo 1
-    struct sembuf wait_operation2 = {0, -1, 0};  // Operación de espera en el semáforo 2
-    struct sembuf signal_operation2 = {0, 1, 0};  // Operación de señal en el semáforo 2
+    struct sembuf wait_operation2 = {1, -1, 0};  // Operación de espera en el semáforo 2
+    struct sembuf signal_operation2 = {1, 1, 0};  // Operación de señal en el semáforo 2
 
     printf("Proceso realizando operaciones de espera y señal en los semáforos...\n");
 
     // Operaciones de espera y señal en el semáforo 1
-    semop(sem_id1, &wait_operation1, 1);
+    semop(sem_id, &wait_operation1, 1);
     printf("Proceso realizó una operación de espera en el semáforo 1\n");
 
-    semop(sem_id1, &signal_operation1, 1);
+    semop(sem_id, &signal_operation1, 1);
     printf("Proceso realizó una operación de señal en el semáforo 1\n");
 
     // Operaciones de espera y señal en el semáforo 2
-    semop(sem_id2, &wait_operation2, 1);
+    semop(sem_id, &wait_operation2, 1);
     printf("Proceso realizó una operación de espera en el semáforo 2\n");
 
-    semop(sem_id2, &signal_operation2, 1);
+    semop(sem_id, &signal_operation2, 1);
     printf("Proceso realizó una operación de señal en el semáforo 2\n");
-
 
 */

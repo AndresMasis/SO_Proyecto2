@@ -27,7 +27,8 @@ typedef struct Settings{
 // ------------------------------------------------------------------------------------------Funciones
 
 // Función para actualizar la bitácora
-void update_bitacora(const char* message, char* action) {
+void update_bitacora(MSJ* mess, char* action) {
+    char* message;
     int pid = getpid();
     FILE* file = fopen("bitacora.txt", "a");
     if (file == NULL) {
@@ -42,7 +43,7 @@ void update_bitacora(const char* message, char* action) {
     local_time = localtime(&current_time);    
     strftime(formatted_time, sizeof(formatted_time), "%Y-%m-%d %H:%M:%S", local_time);
         
-    fprintf(file, "PID: %d, Action: %s, Time: %s, Message: %s\n", pid, action, formatted_time, message);
+    fprintf(file, "PID: %d, Action: %s, Time: %s, \n Message:[PID: %d FECHA: %s HORA: %s LINEA: %d] \n", pid, action, formatted_time, mess->pid, mess->fecha, mess->hora, mess->linea);
     
     fclose(file);
 }

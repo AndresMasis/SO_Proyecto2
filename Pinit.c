@@ -92,6 +92,14 @@ int main(int argc, char *argv[]) {
         perror("Error al inicializar los semáforos contadores");
         return 1;
     }
+    
+    // Crear el archivo de bitácora------------------------------------------------------------------------------
+    FILE *bitacora = fopen("bitacora.txt", "a");
+    if (bitacora == NULL) {
+        perror("Error al abrir el archivo de bitácora");
+        return 1;
+    }    
+    fclose(bitacora);   
 
     printf("Inicialización completa. El programa inicializador terminará.\n");
     

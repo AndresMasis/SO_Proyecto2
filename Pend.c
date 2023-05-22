@@ -56,7 +56,7 @@ int main() {
     // Eliminar  procesos  ------------------------------------------------------------------------------
     system("killall init");
 
-
+    */
     // Cerrar el archivo de bitácora------------------------------------------------------------------------------
     FILE *bitacora = fopen("bitacora.txt", "a");
     if (bitacora == NULL) {
@@ -64,7 +64,7 @@ int main() {
         return 1;
     }    
     fclose(bitacora);
-    */
+
    
     printf("Finalización completa. Todos los recursos han sido liberados.\n");
     

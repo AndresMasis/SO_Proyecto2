@@ -85,6 +85,7 @@ void *writer(void *arg){
                 strcpy(msj->hora, hora);
                 msj->is = 1;
                 tmp_shared_memory[i] = *msj;
+                update_bitacora( *msj, action)
                 printf("\e[92;1m Escribiendo en la linea %d fecha %s hora %s ]\n", msj->linea, msj->fecha, msj->hora);
             }
 

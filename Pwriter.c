@@ -64,7 +64,7 @@ void *writer(void *arg){
             	vectores++;	      			
                 i++;
             }
-               printf("vectORES %d \n",vectores);
+            //  printf("vectORES %d \n",vectores);
             i = 0;
             while (i < vectores)
             {

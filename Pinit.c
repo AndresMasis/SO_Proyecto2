@@ -58,7 +58,30 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     
-    
+    // Inicializar la memoria compartida
+    for (int i = 0; i < num_vectors; i++) {
+        // Inicializar los valores de los vectores/líneas
+        shared_memory[i].pid = i;
+        shared_memory[i].fecha = "12";
+        shared_memory[i].hora = "11";
+        shared_memory[i].linea = i;
+    }
+
+
+
+    // Recorrer la memoria compartida
+    for (int i = 0; i < num_vectors; i++) {
+        // Inicializar los valores de los vectores/líneas
+        shared_memory[i].pid = i;
+        shared_memory[i].fecha = "12";
+        shared_memory[i].hora = "11";
+        shared_memory[i].linea = i;
+        printf("Valor del vector/línea : %d\n", shared_memory[i].pid);
+        printf("Valor del vector/línea : %s\n", shared_memory[i].fecha);
+        printf("Valor del vector/línea : %s\n", shared_memory[i].hora);
+        printf("Valor del vector/línea : %d\n", shared_memory[i].linea);
+    }
+
     // Desvincular la memoria compartida
     if (shmdt(shared_memory) == -1) {
         perror("Error al desvincular la memoria compartida");

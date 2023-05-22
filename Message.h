@@ -25,7 +25,7 @@ typedef struct Settings{
 // ------------------------------------------------------------------------------------------Funciones
 
 // Función para actualizar la bitácora
-void update_bitacora(const char* message) {
+void update_bitacora(const char* message,const char* action) {
     int pid = getpid();
     FILE* file = fopen("bitacora.txt", "a");
     if (file == NULL) {

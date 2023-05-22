@@ -21,7 +21,7 @@
 #include <sys/sem.h>
 // Mensajes
 #include "Message.h"
-
+// Variables globales
 #define SHM_KEY 1234
 #define SEM_KEY 9999
 #define action "Finalizador"

@@ -26,7 +26,7 @@
 
 #define SHM_KEY 1234
 #define SEM_KEY 9999
-#define action "Inicializador"
+#define action2 "Inicializador"
 
 union semun {
     int val;
@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     // Adjuntar la memoria compartida
-    MSJ *shared_memory_spy = (SpyNode *)shmat(shm_id_spy, NULL, 0);
+    SpyNode *shared_memory_spy = (SpyNode *)shmat(shm_id_spy, NULL, 0);
     if (shared_memory_spy == (SpyNode *)-1) {
         perror("Error al adjuntar la memoria compartida spy");
         return 1;

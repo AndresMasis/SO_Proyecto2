@@ -51,12 +51,14 @@ int main() {
         return 1;
     }
     
-    /*
+    
 
     // Eliminar  procesos  ------------------------------------------------------------------------------
-    system("killall init");
+    system("killall Pwriter");
+    system("killall Preader");
+    system("killall PreaderEgo");
 
-    */
+    
     // Cerrar el archivo de bitácora------------------------------------------------------------------------------
     FILE *bitacora = fopen("bitacora.txt", "a");
     if (bitacora == NULL) {

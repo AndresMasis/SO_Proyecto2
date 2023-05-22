@@ -21,6 +21,8 @@
 #include <sys/sem.h>
 // Mensajes
 #include "Message.h"
+// Spy
+#include "Spy.h"
 
 #define SHM_KEY 1234
 #define SEM_KEY 9999
@@ -43,6 +45,7 @@ int main(int argc, char *argv[]) {
     num_vectors = atoi(argv[1]);
     vectores = num_vectors;
     
+
     // Crear la memoria compartida
     // num vectors * sizeof(MSJ)
     int shm_id = shmget(SHM_KEY, num_vectors * sizeof(MSJ), IPC_CREAT | 0666);
@@ -73,6 +76,32 @@ int main(int argc, char *argv[]) {
         perror("Error al desvincular la memoria compartida");
         return 1;
     }
+
+
+    // Crear la memoria compartida para el SPY
+    int shm_id_spy = shmget(SHM_KEY, sizeof(SpyNode), IPC_CREAT | 0666);
+    if (shm_id_spy == -1) {
+        perror("Error al crear la memoria compartida para SPY");
+        return 1;
+    }
+    // Adjuntar la memoria compartida
+    MSJ *shared_memory_spy = (SpyNode *)shmat(shm_id_spy, NULL, 0);
+    if (shared_memory_spy == (SpyNode *)-1) {
+        perror("Error al adjuntar la memoria compartida spy");
+        return 1;
+    }    
+    // Inicializar la memoria compartida spy
+    shared_memory_spy[0].next = NULL;
+    shared_memory_spy[0].pid= 0;
+    shared_memory_spy[0].action= 0;
+    shared_memory_spy[0].type = 0;
+
+    // Desvincular la memoria compartida SPY
+    if (shmdt(shared_memory_spy) == -1) {
+        perror("Error al desvincular la memoria compartida SPY");
+        return 1;
+    }
+
     
      // SEMAFOROS --------------------------------------------------------------------------------
      // 0: Memoria ( el primer semaforo es para la memoria compartida si se puede acceder o no)

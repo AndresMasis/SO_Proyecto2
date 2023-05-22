@@ -11,12 +11,25 @@ typedef struct SpyNode{
     int type, action;
 } SpyNode;
 
-
-
 // Mutex para sincronizar el acceso al archivo
 extern pthread_mutex_t list_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 void printData() {
+
+    // Obtener el ID de la memoria compartida SPY
+    int shm_id = shmget(HEAD, sizeof(SpyNode), 0666);
+    if (shm_id == -1) {
+        perror("Error al obtener el ID de la memoria compartida SPY");
+        return 1;
+    }
+
+    // Adjuntar la memoria compartida SPY
+    SpyNode *head = (SpyNode *)shmat(shm_id, NULL, 0);
+    if (head == (head *)-1) {
+        perror("Error al adjuntar la memoria compartida SPY");
+        return 1;
+    }
+
     // Bloquear el mutex antes de acceder a la lista enlazada
     pthread_mutex_lock(&list_mutex);
 
@@ -31,9 +44,27 @@ void printData() {
 
     // Desbloquear el mutex después de terminar de acceder a la lista enlazada
     pthread_mutex_unlock(&list_mutex);
+
+    // Desadjuntar la memoria compartida
+    shmdt(head);
 }
 
 void writeData(long pid, int action, int type) {
+
+    // Obtener el ID de la memoria compartida SPY
+    int shm_id = shmget(HEAD, sizeof(SpyNode), 0666);
+    if (shm_id == -1) {
+        perror("Error al obtener el ID de la memoria compartida SPY");
+        return 1;
+    }
+
+    // Adjuntar la memoria compartida SPY
+    SpyNode *head = (SpyNode *)shmat(shm_id, NULL, 0);
+    if (head == (head *)-1) {
+        perror("Error al adjuntar la memoria compartida SPY");
+        return 1;
+    }
+
     // Bloquear el mutex antes de acceder a la lista enlazada
     pthread_mutex_lock(&list_mutex);
 
@@ -77,6 +108,10 @@ void writeData(long pid, int action, int type) {
 
     // Desbloquear el mutex después de terminar de acceder a la lista enlazada
     pthread_mutex_unlock(&list_mutex);
+
+    
+    // Desadjuntar la memoria compartida
+    shmdt(head);
 }
 
 #endif

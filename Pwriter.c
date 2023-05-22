@@ -21,6 +21,7 @@
 #include <sys/sem.h>
 // Mensajes
 #include "Message.h"
+#include "Spy.h"
 
 #define SHM_KEY 1234
 #define SEM_KEY 9999
@@ -44,9 +45,11 @@ void *writer(void *arg){
 
     while (true)
     {
+        writeData(msj->pid, 1, 0);
         // Bloqueo el acceso a la memoria compartida
         semop(sem_id, &wait_operation1, 1);
         // Escribo en la memoria compartida
+        writeData(msj->pid, 0, 0);
 
             // Obtener y mostrar la fecha
             fecha = obtenerFecha();
@@ -92,6 +95,7 @@ void *writer(void *arg){
             }
         // Libero la memoria compartida
         semop(sem_id, &signal_operation1, 1);
+        writeData(msj->pid, 2, 0);
         // Duerme el writer
         sleep(sleeping);
     }

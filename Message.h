@@ -22,7 +22,6 @@ typedef struct Settings{
     	MSJ *shared_memory;
 } Settings;
 
- 
 
 // ------------------------------------------------------------------------------------------Funciones
 

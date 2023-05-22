@@ -1,33 +1,39 @@
 #ifndef SPY_H
 #define SPY_H
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <string.h>
+#include <pthread.h>
+
 #define MAX_PID_LENGTH 20
 #define FILENAME "spy_data.txt"
 #define HEAD 1111
 
-typedef struct SpyNode{
+typedef struct SpyNode {
     struct SpyNode* next;
     long pid;
     int type, action;
 } SpyNode;
 
-// Mutex para sincronizar el acceso al archivo
-extern pthread_mutex_t list_mutex = PTHREAD_MUTEX_INITIALIZER;
+// Mutex para sincronizar el acceso al archivo y a la memoria compartida
+pthread_mutex_t list_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 void printData() {
-
     // Obtener el ID de la memoria compartida SPY
     int shm_id = shmget(HEAD, sizeof(SpyNode), 0666);
     if (shm_id == -1) {
         perror("Error al obtener el ID de la memoria compartida SPY");
-        return 1;
+        return;
     }
 
     // Adjuntar la memoria compartida SPY
     SpyNode *head = (SpyNode *)shmat(shm_id, NULL, 0);
-    if (head == (head *)-1) {
+    if (head == (SpyNode *)-1) {
         perror("Error al adjuntar la memoria compartida SPY");
-        return 1;
+        return;
     }
 
     // Bloquear el mutex antes de acceder a la lista enlazada
@@ -50,25 +56,22 @@ void printData() {
 }
 
 void writeData(long pid, int action, int type) {
-
     // Obtener el ID de la memoria compartida SPY
     int shm_id = shmget(HEAD, sizeof(SpyNode), 0666);
     if (shm_id == -1) {
         perror("Error al obtener el ID de la memoria compartida SPY");
-        return 1;
+        return;
     }
 
     // Adjuntar la memoria compartida SPY
     SpyNode *head = (SpyNode *)shmat(shm_id, NULL, 0);
-    if (head == (head *)-1) {
+    if (head == (SpyNode *)-1) {
         perror("Error al adjuntar la memoria compartida SPY");
-        return 1;
+        return;
     }
 
     // Bloquear el mutex antes de acceder a la lista enlazada
     pthread_mutex_lock(&list_mutex);
-
-    printf("Write Data:");
 
     SpyNode* currentNode = head;
     SpyNode* prevNode = NULL;
@@ -83,8 +86,6 @@ void writeData(long pid, int action, int type) {
         prevNode = currentNode;
         currentNode = currentNode->next;
     }
-
-    printf("PID: %ld", pid);
 
     // Si el PID existe, sobrescribir los valores
     if (pidExists) {
@@ -109,7 +110,6 @@ void writeData(long pid, int action, int type) {
     // Desbloquear el mutex después de terminar de acceder a la lista enlazada
     pthread_mutex_unlock(&list_mutex);
 
-    
     // Desadjuntar la memoria compartida
     shmdt(head);
 }

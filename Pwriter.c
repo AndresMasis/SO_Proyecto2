@@ -76,7 +76,7 @@ void *writer(void *arg){
  
             if (i == vectores)
             {
-                printf("\e[92;1m: El writer %d no encuentra espacio] \n", msj->pid);
+                printf("\e[92;1m: El writer %d no encuentra espacio \n", msj->pid);
             }
             else
             {
@@ -86,11 +86,10 @@ void *writer(void *arg){
                 msj->is = 1;
                 tmp_shared_memory[i] = *msj;
                 update_bitacora( msj, action);
-                printf("\e[92;1m Escribiendo en la linea %d fecha %s hora %s ]\n", msj->linea, msj->fecha, msj->hora);
+                printf("\e[92;1m Escribiendo en la linea %d fecha %s hora %s \n", msj->linea, msj->fecha, msj->hora);
+                // Tiempo que tarda en escribir
+                sleep(writing);
             }
-
-        // Tiempo que tarda en escribir
-        sleep(writing);
         // Libero la memoria compartida
         semop(sem_id, &signal_operation1, 1);
         // Duerme el writer

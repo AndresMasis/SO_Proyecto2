@@ -24,12 +24,12 @@
 
 #define SHM_KEY 1234
 #define SEM_KEY 9999
-#define action "Writer"
+#define action "Reader"
 
 void *writer(void *arg){
     Settings * sett = (Settings *)arg;
     int sleeping = sett->sleeping;
-    int writing = sett->actor;
+    int reading = sett->actor;
     MSJ *shared_memory = sett->shared_memory;
     int sem_id = sett->sem_id;
 
@@ -41,34 +41,28 @@ void *writer(void *arg){
 
     char *fecha;  // Suficiente espacio para "YYYY-MM-DD" + el carácter nulo
     char *hora;    // Suficiente espacio para "HH:MM:SS" + el carácter nulo
-
+    int linea = 0;
     while (true)
-    {
+    {        
         // Bloqueo el acceso a la memoria compartida
         semop(sem_id, &wait_operation1, 1);
-        // Escribo en la memoria compartida
-
-            // Obtener y mostrar la fecha
-            fecha = obtenerFecha();
-            // Obtener y mostrar la hora
-            hora = obtenerHora();   
-
-            // Ver que linea de la memoria compartida esta disponible y escribir
+        // Libero la memoria compartida
+        semop(sem_id, &signal_operation1, 1);
+        // Leo en la memoria compartida
+ 
+            // Ver que linea de la memoria compartida tiene un mensaje
             int i = 0;
-
-	    MSJ *tmp_shared_memory = shared_memory;
-	    
+	        MSJ *tmp_shared_memory = shared_memory;	    
      	    int vectores = 0;
             while (tmp_shared_memory[i].is == 1)
             {
             	vectores++;	      			
                 i++;
             }
-            //  printf("vectORES %d \n",vectores);
-            i = 0;
+            i = linea;
             while (i < vectores)
             {
-                if(tmp_shared_memory[i].pid == -1){
+                if(tmp_shared_memory[i].pid != -1){
 	      		break;		
 	      	}	      			
                 i++;
@@ -76,24 +70,25 @@ void *writer(void *arg){
  
             if (i == vectores)
             {
-                printf("\e[92;1m: El writer %d no encuentra espacio] \n", msj->pid);
+                printf("\e[92;1m: El reader %ld no encuentra nada que leer \n", msj->pid);
             }
             else
             {
-	        msj->linea = i;
+                // Obtener y mostrar la fecha
+                fecha = obtenerFecha();
+                // Obtener y mostrar la hora
+                hora = obtenerHora();   
+                linea = i;
+	            msj->linea = i;
                 strcpy(msj->fecha, fecha);
                 strcpy(msj->hora, hora);
                 msj->is = 1;
-                tmp_shared_memory[i] = *msj;
                 update_bitacora( msj, action);
-                printf("\e[92;1m Escribiendo en la linea %d fecha %s hora %s ]\n", msj->linea, msj->fecha, msj->hora);
+                printf("\e[92;1m Leyendo la linea %d fecha %s hora %s \n", msj->linea, msj->fecha, msj->hora);
+                // Tiempo que tarda en leer
+                sleep(reading);
             }
-
-        // Tiempo que tarda en escribir
-        sleep(writing);
-        // Libero la memoria compartida
-        semop(sem_id, &signal_operation1, 1);
-        // Duerme el writer
+        // Duerme el lector
         sleep(sleeping);
     }
 
@@ -103,15 +98,15 @@ void *writer(void *arg){
 
 int main(int argc, char *argv[]) {    
     if (argc != 4) {
-        printf("Uso: %s <num_writers> <sleeping> <writing>\n", argv[0]);
+        printf("Uso: %s <num_readers> <sleeping> <reading>\n", argv[0]);
         return 1;
     }
     
     printf("Writer looking for space \n");
 
-    int num_writers = atoi(argv[1]);
+    int num_readers = atoi(argv[1]);
     int sleeping = atoi(argv[2]);
-    int writing = atoi(argv[3]);
+    int reading = atoi(argv[3]);
     
     // Obtener el ID de la memoria compartida--------
     int shm_id = shmget(SHM_KEY, 0, 0);
@@ -134,18 +129,18 @@ int main(int argc, char *argv[]) {
 
     Settings * sett = (Settings *)malloc(sizeof(Settings));
     sett->sleeping = sleeping;
-    sett->actor = writing;
+    sett->actor = reading;
     sett->shared_memory = shared_memory;
     sett->sem_id = sem_id;
     int i = 0;
      
      //printf("vect %d \n",shared_memory[0].pid);
      
-    while ( i < num_writers)
+    while ( i < num_readers)
     {
-        pthread_t writ_thread;
-        if(pthread_create(&writ_thread, NULL, &writer, (void*)sett) != 0){
-            printf("\e[91;103;1m Error pthread writer\e[0m\n");
+        pthread_t reader_thread;
+        if(pthread_create(&reader_thread, NULL, &reader, (void*)sett) != 0){
+            printf("\e[91;103;1m Error pthread reader\e[0m\n");
             return EXIT_FAILURE;
         }
         i++;

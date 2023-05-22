@@ -27,7 +27,6 @@
 #define action "Writer"
 
 void *writer(void *arg){
-
     Settings * sett = (Settings *)arg;
     int sleeping = sett->sleeping;
     int writing = sett->actor;
@@ -43,10 +42,12 @@ void *writer(void *arg){
     char fecha[11];  // Suficiente espacio para "YYYY-MM-DD" + el carácter nulo
     char hora[9];    // Suficiente espacio para "HH:MM:SS" + el carácter nulo
 
+            printf("Writer looking for space 2 \n");
     while (true)
     {
         // Bloqueo el acceso a la memoria compartida
         semop(sem_id, &wait_operation1, 1);
+        
         // Escribo en la memoria compartida
 
             // Obtener y mostrar la fecha
@@ -56,24 +57,29 @@ void *writer(void *arg){
 
             // Ver que linea de la memoria compartida esta disponible y escribir
             int i = 0;
-            int flag = 1;
 
-            while (&shared_memory[i] != NULL && i < vectores)
+ printf("Writer looking for space 3.2 \n");
+            while (i < vectores)
             {
+                if(&shared_memory[i].pid != NULL)
+	       		printf("No es nulo \n");		
                 i++;
             }
-       
+ printf("Writer looking for space 3.3 \n");       
+ 
             if (i == vectores)
-                flag = 0;
+            {
+                printf("\e[92;1m: El writer %d no encuentra espacio] \n", msj->pid);
+            }
             else
-                flag = 1;
-
-            if (flag){
-                msj->linea = i;
+            {
+	        msj->linea = i;
                 strcpy(msj->fecha, fecha);
                 strcpy(msj->hora, hora);
-                printf("\e[92;1m: Escribiendo en la linea %d fecha %s hora %s \n", msj->linea, msj->fecha, msj->hora);
+                printf("\e[92;1m: Escribiendo en la linea %d fecha %s hora %s ]\n", msj->linea, msj->fecha, msj->hora);
             }
+
+
 
         // Tiempo que tarda en escribir
         sleep(writing);
@@ -83,9 +89,9 @@ void *writer(void *arg){
         sleep(sleeping);
     }
 
-    pthread_exit(NULL);    
-	pthread_detach(pthread_self());
+    pthread_detach(pthread_self());
 }
+
 
 int main(int argc, char *argv[]) {    
     if (argc != 4) {
@@ -93,6 +99,8 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     
+    printf("Writer looking for space \n");
+
     int num_writers = atoi(argv[1]);
     int sleeping = atoi(argv[2]);
     int writing = atoi(argv[3]);
@@ -108,6 +116,7 @@ int main(int argc, char *argv[]) {
         perror("Error al adjuntar la memoria compartida");
         return 1;
     }
+       
      // Obtener el ID del conjunto de semáforos-----
     int sem_id = semget(SEM_KEY, 0, 0);
     if (sem_id == -1) {
@@ -121,8 +130,11 @@ int main(int argc, char *argv[]) {
     sett->shared_memory = shared_memory;
     sett->sem_id = sem_id;
     int i = 0;
+     
     while ( i < num_writers)
     {
+    
+
         pthread_t writ_thread;
         if(pthread_create(&writ_thread, NULL, &writer, (void*)sett) != 0){
             printf("\e[91;103;1m Error pthread writer\e[0m\n");

@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
     }    
     num_vectors = atoi(argv[1]);
     vectores = num_vectors;
-
+    
     // Crear la memoria compartida
     // num vectors * sizeof(MSJ)
     int shm_id = shmget(SHM_KEY, num_vectors * sizeof(MSJ), IPC_CREAT | 0666);

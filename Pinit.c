@@ -99,7 +99,7 @@ int main(int argc, char *argv[]) {
         perror("Error al abrir el archivo de bitácora");
         return 1;
     }        
-    fprintf(bitacora, " \n \t### --- EXECUTION START --- ### ");    
+    fprintf(bitacora, " \n \t### --- EXECUTION START --- ### \n \n");    
     fclose(bitacora);   
 
     printf("Inicialización completa. El programa inicializador terminará.\n");

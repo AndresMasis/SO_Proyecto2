@@ -58,7 +58,7 @@ void *writer(void *arg){
             int i = 0;
             int flag = 1;
 
-            while (shared_memory[i] != NULL && i < vectores)
+            while (&shared_memory[i] != NULL && i < vectores)
             {
                 i++;
             }

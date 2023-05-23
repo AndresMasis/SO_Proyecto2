@@ -71,14 +71,19 @@ void *readerEgo(void *arg){
                 i++;
             }
             i = linea;
-            while (i < vectores)
-            {
-                if(tmp_shared_memory[i].pid != -1){
-	      		break;		
-	      	}	      			
-                i++;
-            }    
+            int *lineasR = (int*)malloc(vectores * sizeof(int));
  
+            for (int j = 0; i < vectores; i++) {
+                if (tmp_shared_memory[i].pid != -1) {
+                    lineas[j] = tmp_shared_memory[i].pid; // Guardar valor en la lista
+                    j++;
+                }
+            }
+            // Obtener un valor aleatorio de la lista
+            srand(time(NULL)); // Inicializar la semilla del generador de números aleatorios
+            int indice_aleatorio = rand() % vectores;
+            i = lineas[indice_aleatorio];
+
             if (i == vectores)
             {
                 printf("\e[92;1m: El reader-ego %ld no encuentra nada que leer \n", msj->pid);

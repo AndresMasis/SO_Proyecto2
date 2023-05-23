@@ -64,28 +64,7 @@ int main() {
 		printf("Leyendo el mensaje PID: NULL Linea:%d Fecha: NULL Hora: NULL\n",i);	     	
       	}	
         i++;
-    }    
-    
-    struct shmid_ds shm_info; 
- 
-    // Obtener información sobre la memoria compartida 
-    if (shmctl(shm_id, IPC_STAT, &shm_info) == -1) { 
-        perror("Error al obtener información sobre la memoria compartida"); 
-        return; 
-    } 
- 
-    // PID del proceso actual 
-    pid_t current_pid = getpid(); 
- 
-    // Imprimir los PIDs de los procesos que tienen acceso a la memoria compartida 
-    printf("\n\t #PIDs con acceso a la memoria compartida\n"); 
-    for (int i = 0; i < shm_info.shm_nattch; i++) { 
-        pid_t pid = shm_info.shm_cpid; 
-        printf("\t - %d\n", pid); 
-        
-    }
-    
-    
+    }     
     
     printf("\n\t # States \n");
     printData();    

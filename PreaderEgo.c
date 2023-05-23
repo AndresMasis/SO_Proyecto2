@@ -42,6 +42,7 @@ void *readerEgoista(void *arg){
     char *fecha;  // Suficiente espacio para "YYYY-MM-DD" + el carácter nulo
     char *hora;    // Suficiente espacio para "HH:MM:SS" + el carácter nulo
 
+    int linea = 0;
     while (true)
     {
         // Bloqueo el acceso a la memoria compartida
@@ -164,7 +165,7 @@ int main(int argc, char *argv[]) {
     while ( i < num_writers)
     {
         pthread_t writ_thread;
-        if(pthread_create(&writ_thread, NULL, &writer, (void*)sett) != 0){
+        if(pthread_create(&writ_thread, NULL, &readerEgoista, (void*)sett) != 0){
             printf("\e[91;103;1m Error pthread writer\e[0m\n");
             return EXIT_FAILURE;
         }

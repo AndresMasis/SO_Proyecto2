@@ -81,7 +81,7 @@ void *readerEgo(void *arg){
             
             if (j == 0)
             {
-                printf("\e[92;1m: El reader-ego %ld no encuentra nada que leer \n", msj->pid);
+                printf("\e[92;1m: El reader-ego %ld no encuentra nada que leer \n",pid2);
             }
             else
             {
@@ -101,7 +101,7 @@ void *readerEgo(void *arg){
                 strcpy(msj->hora, tmp_shared_memory[i].hora);
 
                 update_bitacora( msj, action);
-                printf("\e[92;1m Robando la linea %d fecha %s hora %s \n", msj->linea, msj->fecha, msj->hora);
+                printf("\e[92;1m Robando la linea %d fecha %s hora %s \n",i, fecha, hora);
 
                 tmp_shared_memory[i].pid = -1;
                 memcpy(tmp_shared_memory[i].fecha,"YYYY-MM-DD",10);

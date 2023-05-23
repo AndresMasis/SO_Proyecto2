@@ -21,30 +21,174 @@
 #include <sys/sem.h>
 // Mensajes
 #include "Message.h"
+// SPY
+#include "Spy.h"
+
 
 #define SHM_KEY 1234
 #define SEM_KEY 9999
-#define action "Reader-Egoista"
+#define action "ReaderEgo"
+
+ // Mutex para sincronizar el acceso a la  y a la memoria compartida
+pthread_mutex_t list_mutex2 = PTHREAD_MUTEX_INITIALIZER;
+
+void *readerEgo(void *arg){
+    Settings * sett = (Settings *)arg;
+    int sleeping = sett->sleeping;
+    int reading = sett->actor;
+    MSJ *shared_memory = sett->shared_memory;
+    int sem_id = sett->sem_id;
+
+    struct sembuf wait_operation1 = {0, -1, 0};  // Operación de espera 
+    struct sembuf signal_operation1 = {0, 1, 0};  // Operación de señal 
+
+    struct sembuf wait_operation2 = {1, -1, 0};  // Operación de espera ego
+    struct sembuf signal_operation2 = {1, 0, 0};  // Operación de señal ego
+
+    MSJ *msj = (MSJ *)malloc(sizeof(MSJ));
+    msj->pid = (long)pthread_self();
+    long pid2 = (long)pthread_self();
+
+    char *fecha;  // Suficiente espacio para "YYYY-MM-DD" + el carácter nulo
+    char *hora;    // Suficiente espacio para "HH:MM:SS" + el carácter nulo
+    
+    while (true)
+    {        
+    writeData(pid2, 3, 2);
+        	
+	writeData(pid2, 1, 2);
+        // Bloqueo el acceso a la memoria compartida
+        semop(sem_id, &wait_operation1, 1);       
+
+        // Bloqueo el acceso egoista
+        semop(sem_id, &wait_operation2, 1);      
+
+            // Leo en la memoria compartida
+ 	        writeData(pid2, 0, 2);
+            // Ver que linea de la memoria compartida tiene un mensaje
+            int i = 0;
+	        MSJ *tmp_shared_memory = shared_memory;	    
+     	    int vectores = 0;
+            while (tmp_shared_memory[i].is == 1)
+            {
+            	vectores++;	      			
+                i++;
+            }
+            i = 0;
+            int *lineasR = (int*)malloc(vectores * sizeof(int));
+            int j = 0; 
+            while (i < vectores) {                 
+                if (tmp_shared_memory[i].pid != -1) {
+                    lineasR[j] = i; // Guardar valor en la lista de la linea
+                    j++;
+                }
+                i++;
+            }
+            
+            if (j == 0)
+            {
+                printf("\e[92;1m: El reader-ego %ld no encuentra nada que leer \n",pid2);
+            }
+            else
+            {
+                // Obtener un valor aleatorio de la lista
+                srand(time(NULL)); // Inicializar la semilla del generador de números aleatorios
+                int indice_aleatorio = rand() % j;
+                i = lineasR[indice_aleatorio];
+
+                // Obtener y mostrar la fecha
+                fecha = obtenerFecha();
+                // Obtener y mostrar la hora
+                hora = obtenerHora();   
+                
+                msj->pid = tmp_shared_memory[i].pid;
+	            msj->linea = tmp_shared_memory[i].linea;
+                strcpy(msj->fecha, tmp_shared_memory[i].fecha);
+                strcpy(msj->hora, tmp_shared_memory[i].hora);
+
+                update_bitacora( msj, action);
+                printf("\e[92;1m Robando la linea %d fecha %s hora %s \n",i, fecha, hora);
+
+                tmp_shared_memory[i].pid = -1;
+                memcpy(tmp_shared_memory[i].fecha,"YYYY-MM-DD",10);
+                memcpy(tmp_shared_memory[i].hora,"YY-MM-DD",8);
+                tmp_shared_memory[i].linea = i;
+                tmp_shared_memory[i].is = 1;
+                
+                // Tiempo que tarda en leer
+                sleep(reading);
+            }
+          
+        // Libero la memoria compartida
+        semop(sem_id, &signal_operation1, 1);   
+        
+        // Libero el acceso al egoista
+        semop(sem_id, &signal_operation2, 0);   
+
+        writeData(pid2, 2, 2);
+        // Duerme el lector
+        sleep(sleeping);
+    }
+
+    pthread_detach(pthread_self());
+}
+
 
 int main(int argc, char *argv[]) {    
-    if (argc != 2) {
+    if (argc != 4) {
         printf("Uso: %s <num_readers_ego> <sleeping> <reading>\n", argv[0]);
         return 1;
     }
     
-    int num_readers_ego = atoi(argv[1]);
+    printf("Reader looking for a line \n");
+
+    int num_readers = atoi(argv[1]);
     int sleeping = atoi(argv[2]);
     int reading = atoi(argv[3]);
     
-    /*
-    No permitir que más de 3 readers egoístas tengan acceso a la memoria
-    compartida de manera consecutiva. Si se presenta esta situación la memoria compartida
-    debe ser entregado a algún otro proceso que esté compitiendo por él. SI no hay nadie más
-    podrán seguir leyendo los egoístas hasta que alguien solicite el recurso
+    // Obtener el ID de la memoria compartida--------
+    int shm_id = shmget(SHM_KEY, 0, 0);
+    if (shm_id == -1) {
+        perror("Error al obtener el ID de la memoria compartida");
+        return 1;
+    }    
+    MSJ *shared_memory = (MSJ *)shmat(shm_id, NULL, 0);
+    if (shared_memory == (MSJ *)-1) {
+        perror("Error al adjuntar la memoria compartida");
+        return 1;
+    }
+       
+     // Obtener el ID del conjunto de semáforos-----
+    int sem_id = semget(SEM_KEY, 0, 0);
+    if (sem_id == -1) {
+        perror("Error al obtener el ID del conjunto de semáforos");
+        return 1;
+    }
 
-    */
+    Settings * sett = (Settings *)malloc(sizeof(Settings));
+    sett->sleeping = sleeping;
+    sett->actor = reading;
+    sett->shared_memory = shared_memory;
+    sett->sem_id = sem_id;
+    int i = 0;
+     
+     //printf("vect %d \n",shared_memory[0].pid);
+     
+    while ( i < num_readers)
+    {
+        pthread_t reader_thread;
+        if(pthread_create(&reader_thread, NULL, &readerEgo, (void*)sett) != 0){
+            printf("\e[91;103;1m Error pthread reader\e[0m\n");
+            return EXIT_FAILURE;
+        }
+        i++;
+    }
     
-    printf("Inicialización completa. El programa inicializador terminará.\n");
+    while (true)
+    {
+        sleep(1);
+    }
     
+
     return 0;
 }

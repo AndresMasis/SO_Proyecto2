@@ -21,30 +21,54 @@
 #include <sys/sem.h>
 // Mensajes
 #include "Message.h"
+// SPY
+#include "Spy.h"
+
 
 #define SHM_KEY 1234
 #define SEM_KEY 9999
-#define action "Reader-Egoista"
+#define action "Spy"
 
-int main(int argc, char *argv[]) {    
-    if (argc != 2) {
-        printf("Uso: %s <num_readers_ego> <sleeping> <reading>\n", argv[0]);
+int main() {
+
+    printf("\n\t\t ### Spy ###\n\n");
+    printf("\n\t # Memory \n");
+    // Obtener el ID de la memoria compartida--------
+    int shm_id = shmget(SHM_KEY, 0, 0);
+    if (shm_id == -1) {
+        perror("Error al obtener el ID de la memoria compartida");
+        return 1;
+    }    
+    MSJ *shared_memory = (MSJ *)shmat(shm_id, NULL, 0);
+    if (shared_memory == (MSJ *)-1) {
+        perror("Error al adjuntar la memoria compartida");
         return 1;
     }
-    
-    int num_readers_ego = atoi(argv[1]);
-    int sleeping = atoi(argv[2]);
-    int reading = atoi(argv[3]);
-    
-    /*
-    No permitir que más de 3 readers egoístas tengan acceso a la memoria
-    compartida de manera consecutiva. Si se presenta esta situación la memoria compartida
-    debe ser entregado a algún otro proceso que esté compitiendo por él. SI no hay nadie más
-    podrán seguir leyendo los egoístas hasta que alguien solicite el recurso
 
-    */
+    // Leer la memoria compartida
+    int i = 0;
+    MSJ *tmp_shared_memory = shared_memory;	    
+    int vectores = 0;
+    while (tmp_shared_memory[i].is == 1)
+    {
+    	vectores++;	      			
+        i++;
+    }
+    i = 0;
+    while (i < vectores)
+    {
+        if(tmp_shared_memory[i].pid != -1){	
+        	printf("Leyendo el mensaje PID: %ld Linea:%d Fecha: %s Hora: %s \n",tmp_shared_memory[i].pid,  tmp_shared_memory[i].linea, tmp_shared_memory[i].fecha, tmp_shared_memory[i].hora);		
+      	}	
+      	else{      	
+		printf("Leyendo el mensaje PID: NULL Linea:%d Fecha: NULL Hora: NULL\n",i);	     	
+      	}	
+        i++;
+    }     
     
-    printf("Inicialización completa. El programa inicializador terminará.\n");
+    printf("\n\t # States \n");
+    printData();    
     
+    printf("\n\n");
     return 0;
 }

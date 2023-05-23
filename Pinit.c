@@ -21,10 +21,12 @@
 #include <sys/sem.h>
 // Mensajes
 #include "Message.h"
+// Spy
+#include "Spy.h"
 
 #define SHM_KEY 1234
 #define SEM_KEY 9999
-#define action "Inicializador"
+#define action2 "Inicializador"
 
 union semun {
     int val;
@@ -41,6 +43,8 @@ int main(int argc, char *argv[]) {
         return 1;
     }    
     num_vectors = atoi(argv[1]);
+    vectores = num_vectors;
+    
 
     // Crear la memoria compartida
     // num vectors * sizeof(MSJ)
@@ -49,26 +53,57 @@ int main(int argc, char *argv[]) {
         perror("Error al crear la memoria compartida");
         return 1;
     }
-    
-    /*
+
     // Adjuntar la memoria compartida
     MSJ *shared_memory = (MSJ *)shmat(shm_id, NULL, 0);
     if (shared_memory == (MSJ *)-1) {
         perror("Error al adjuntar la memoria compartida");
         return 1;
     }
-    */
+    
     // Inicializar la memoria compartida
     for (int i = 0; i < num_vectors; i++) {
-        // Inicializar los valores de los vectores/líneas como desees
-        shared_memory[i] = i;
+        // Inicializar los valores de los vectores/líneas
+        shared_memory[i].pid = -1;
+        memcpy(shared_memory[i].fecha,"YYYY-MM-DD",10);
+        memcpy(shared_memory[i].hora,"YY-MM-DD",8);
+        shared_memory[i].linea = i;
+        shared_memory[i].is = 1;
     }
-    
+
     // Desvincular la memoria compartida
     if (shmdt(shared_memory) == -1) {
         perror("Error al desvincular la memoria compartida");
         return 1;
     }
+
+
+    // Crear la memoria compartida para el SPY
+    int shm_id_spy = shmget(HEAD, sizeof(SpyNode) * 200, IPC_CREAT | 0666);
+    if (shm_id_spy == -1) {
+        perror("Error al crear la memoria compartida para SPY");
+        return 1;
+    }
+    // Adjuntar la memoria compartida
+    SpyNode *shared_memory_spy = (SpyNode *)shmat(shm_id_spy, NULL, 0);
+    if (shared_memory_spy == (SpyNode *)-1) {
+        perror("Error al adjuntar la memoria compartida spy");
+        return 1;
+    }    
+    // Inicializar la memoria compartida spy
+    for (int i = 0; i < 200; i++) {		
+	    shared_memory_spy[0].next = NULL;
+	    shared_memory_spy[0].pid= 0;
+	    shared_memory_spy[0].action= 0;
+	    shared_memory_spy[0].type = 0;
+    }
+
+    // Desvincular la memoria compartida SPY
+    if (shmdt(shared_memory_spy) == -1) {
+        perror("Error al desvincular la memoria compartida SPY");
+        return 1;
+    }
+
     
      // SEMAFOROS --------------------------------------------------------------------------------
      // 0: Memoria ( el primer semaforo es para la memoria compartida si se puede acceder o no)
@@ -88,6 +123,15 @@ int main(int argc, char *argv[]) {
         perror("Error al inicializar los semáforos contadores");
         return 1;
     }
+    
+    // Crear el archivo de bitácora------------------------------------------------------------------------------
+    FILE *bitacora = fopen("bitacora.txt", "w");
+    if (bitacora == NULL) {
+        perror("Error al abrir el archivo de bitácora");
+        return 1;
+    }        
+    fprintf(bitacora, " \n \t### --- EXECUTION START --- ### \n \n");    
+    fclose(bitacora);   
 
     printf("Inicialización completa. El programa inicializador terminará.\n");
     
@@ -205,26 +249,26 @@ int main() {
 /*  --------------------------------------------------------------------Como usar los semaforos
 
   // Realizar operaciones de espera y señal en los semáforos
+ // Realizar operaciones de espera y señal en los semáforos
     struct sembuf wait_operation1 = {0, -1, 0};  // Operación de espera en el semáforo 1
     struct sembuf signal_operation1 = {0, 1, 0};  // Operación de señal en el semáforo 1
-    struct sembuf wait_operation2 = {0, -1, 0};  // Operación de espera en el semáforo 2
-    struct sembuf signal_operation2 = {0, 1, 0};  // Operación de señal en el semáforo 2
+    struct sembuf wait_operation2 = {1, -1, 0};  // Operación de espera en el semáforo 2
+    struct sembuf signal_operation2 = {1, 1, 0};  // Operación de señal en el semáforo 2
 
     printf("Proceso realizando operaciones de espera y señal en los semáforos...\n");
 
     // Operaciones de espera y señal en el semáforo 1
-    semop(sem_id1, &wait_operation1, 1);
+    semop(sem_id, &wait_operation1, 1);
     printf("Proceso realizó una operación de espera en el semáforo 1\n");
 
-    semop(sem_id1, &signal_operation1, 1);
+    semop(sem_id, &signal_operation1, 1);
     printf("Proceso realizó una operación de señal en el semáforo 1\n");
 
     // Operaciones de espera y señal en el semáforo 2
-    semop(sem_id2, &wait_operation2, 1);
+    semop(sem_id, &wait_operation2, 1);
     printf("Proceso realizó una operación de espera en el semáforo 2\n");
 
-    semop(sem_id2, &signal_operation2, 1);
+    semop(sem_id, &signal_operation2, 1);
     printf("Proceso realizó una operación de señal en el semáforo 2\n");
-
 
 */

@@ -21,6 +21,8 @@
 #include <sys/sem.h>
 // Mensajes
 #include "Message.h"
+// Spy
+#include "Spy.h"
 
 #define SHM_KEY 1234
 #define SEM_KEY 9999
@@ -39,6 +41,18 @@ int main() {
         return 1;
     }
     
+    // Obtener el ID de la memoria compartida SPY---------------------------------------
+    int shm_id_spy = shmget(HEAD, 0, 0);
+    if (shm_id_spy == -1) {
+        perror("Error al obtener el ID de la memoria compartida SPY");
+        return 1;
+    }    
+    // Desvincular y eliminar la memoria compartida SPY
+    if (shmctl(shm_id_spy, IPC_RMID, NULL) == -1) {
+        perror("Error al eliminar la memoria compartida SPY");
+        return 1;
+    }
+
     // Obtener el ID del conjunto de semáforos---------------------------------------
     int sem_id = semget(SEM_KEY, 0, 0);
     if (sem_id == -1) {
@@ -51,20 +65,39 @@ int main() {
         return 1;
     }
     
-    /*
+    
 
     // Eliminar  procesos  ------------------------------------------------------------------------------
-    system("killall init");
+    system("killall Preader");
+    system("killall Pwriter");
+    system("killall PreaderEgo");
 
+    FILE *archivo;
+    char linea[200];
 
+    // Abrir el archivo en modo de lectura
+    archivo = fopen("bitacora.txt", "r");
+    if (archivo == NULL) {
+        printf("No se pudo abrir el archivo.\n");
+        return 1;
+    }
+    // Leer y mostrar cada línea del archivo
+    while (fgets(linea, sizeof(linea), archivo) != NULL) {
+        printf("%s", linea);
+    }
+    // Cerrar el archivo
+    fclose(archivo);
+
+    
     // Cerrar el archivo de bitácora------------------------------------------------------------------------------
     FILE *bitacora = fopen("bitacora.txt", "a");
     if (bitacora == NULL) {
         perror("Error al abrir el archivo de bitácora");
         return 1;
-    }    
+    }
+    fprintf(bitacora, " \n \t### --- EXECUTION ENDED --- ###  \n \n");    
     fclose(bitacora);
-    */
+
    
     printf("Finalización completa. Todos los recursos han sido liberados.\n");
     

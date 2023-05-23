@@ -75,7 +75,7 @@ void *readerEgo(void *arg){
  
             for (int j = 0; i < vectores; i++) {
                 if (tmp_shared_memory[i].pid != -1) {
-                    lineasR[j] = tmp_shared_memory[i].pid; // Guardar valor en la lista
+                    lineasR[j] = i; // Guardar valor en la lista de la linea
                     j++;
                 }
             }
@@ -84,6 +84,7 @@ void *readerEgo(void *arg){
             int indice_aleatorio = rand() % vectores;
             i = lineasR[indice_aleatorio];
 
+            printf("Line to DELETE %d\n", i);
             if (i == vectores)
             {
                 printf("\e[92;1m: El reader-ego %ld no encuentra nada que leer \n", msj->pid);

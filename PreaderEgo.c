@@ -49,8 +49,6 @@ void *readerEgo(void *arg){
     char *fecha;  // Suficiente espacio para "YYYY-MM-DD" + el carácter nulo
     char *hora;    // Suficiente espacio para "HH:MM:SS" + el carácter nulo
     
-    int linea = 0;
-    
     while (true)
     {        
     writeData(pid2, 3, 2);
@@ -70,32 +68,32 @@ void *readerEgo(void *arg){
             	vectores++;	      			
                 i++;
             }
-            i = linea;
+            i = 0;
             int *lineasR = (int*)malloc(vectores * sizeof(int));
- 
-            for (int j = 0; i < vectores; i++) {
+            int j = 0; 
+            while (i < vectores) {                 
                 if (tmp_shared_memory[i].pid != -1) {
                     lineasR[j] = i; // Guardar valor en la lista de la linea
                     j++;
                 }
+                i++;
             }
-            // Obtener un valor aleatorio de la lista
-            srand(time(NULL)); // Inicializar la semilla del generador de números aleatorios
-            int indice_aleatorio = rand() % vectores;
-            i = lineasR[indice_aleatorio];
-
+            
             printf("Line to DELETE %d\n", i);
-            if (i == vectores)
+            if (j == 0)
             {
                 printf("\e[92;1m: El reader-ego %ld no encuentra nada que leer \n", msj->pid);
             }
             else
             {
+                // Obtener un valor aleatorio de la lista
+                srand(time(NULL)); // Inicializar la semilla del generador de números aleatorios
+                int indice_aleatorio = rand() % vectores;
+                i = lineasR[indice_aleatorio];
                 // Obtener y mostrar la fecha
                 fecha = obtenerFecha();
                 // Obtener y mostrar la hora
                 hora = obtenerHora();   
-                linea = i;
                 
                 msj->pid = tmp_shared_memory[i].pid;
 	            msj->linea = tmp_shared_memory[i].linea;
@@ -113,9 +111,6 @@ void *readerEgo(void *arg){
                 
                 // Tiempo que tarda en leer
                 sleep(reading);
-                linea++;
-                if (linea == vectores)
-			        linea = 0;
             }
           
         // Libero la memoria compartida

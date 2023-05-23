@@ -24,12 +24,15 @@
 // SPY
 #include "Spy.h"
 
+
 #define SHM_KEY 1234
 #define SEM_KEY 9999
-#define action "Reader"
+#define action "ReaderEgo"
+int reads = 0;
 
-
-    
+ // Mutex para sincronizar el acceso a la  y a la memoria compartida
+pthread_mutex_t list_mutex = PTHREAD_MUTEX_INITIALIZER;
+.
 void *reader(void *arg){
     Settings * sett = (Settings *)arg;
     int sleeping = sett->sleeping;
@@ -42,6 +45,7 @@ void *reader(void *arg){
 
     MSJ *msj = (MSJ *)malloc(sizeof(MSJ));
     msj->pid = (long)pthread_self();
+    long pid2 = (long)pthread_self();
 
     char *fecha;  // Suficiente espacio para "YYYY-MM-DD" + el carácter nulo
     char *hora;    // Suficiente espacio para "HH:MM:SS" + el carácter nulo
@@ -50,12 +54,14 @@ void *reader(void *arg){
     
     while (true)
     {        
+    writeData(pid2, 3, 2);
+        	
+	writeData(pid2, 1, 2);
         // Bloqueo el acceso a la memoria compartida
-        semop(sem_id, &wait_operation1, 1);
-        // Libero la memoria compartida
-        semop(sem_id, &signal_operation1, 1);
-        // Leo en la memoria compartida
- 
+        semop(sem_id, &wait_operation1, 1);       
+
+            // Leo en la memoria compartida
+ 	        writeData(pid2, 0, 2);
             // Ver que linea de la memoria compartida tiene un mensaje
             int i = 0;
 	        MSJ *tmp_shared_memory = shared_memory;	    
@@ -76,7 +82,7 @@ void *reader(void *arg){
  
             if (i == vectores)
             {
-                printf("\e[92;1m: El reader %ld no encuentra nada que leer \n", msj->pid);
+                printf("\e[92;1m: El reader-ego %ld no encuentra nada que leer \n", msj->pid);
             }
             else
             {
@@ -87,18 +93,29 @@ void *reader(void *arg){
                 linea = i;
                 
                 msj->pid = tmp_shared_memory[i].pid;
-	        msj->linea = tmp_shared_memory[i].linea;
+	            msj->linea = tmp_shared_memory[i].linea;
                 strcpy(msj->fecha, tmp_shared_memory[i].fecha);
                 strcpy(msj->hora, tmp_shared_memory[i].hora);
 
                 update_bitacora( msj, action);
-                printf("\e[92;1m Leyendo la linea %d fecha %s hora %s \n", msj->linea, msj->fecha, msj->hora);
+                printf("\e[92;1m Robando la linea %d fecha %s hora %s \n", msj->linea, msj->fecha, msj->hora);
+
+                tmp_shared_memory[i].pid = -1;
+                memcpy(tmp_shared_memory[i].fecha,"YYYY-MM-DD",10);
+                memcpy(tmp_shared_memory[i].hora,"YY-MM-DD",8);
+                tmp_shared_memory[i].linea = i;
+                tmp_shared_memory[i].is = 1;
+                
                 // Tiempo que tarda en leer
                 sleep(reading);
                 linea++;
                 if (linea == vectores)
-			linea = 0;
+			        linea = 0;
             }
+          
+        // Libero la memoria compartida
+        semop(sem_id, &signal_operation1, 1);   
+        writeData(pid2, 2, 2);
         // Duerme el lector
         sleep(sleeping);
     }
@@ -113,7 +130,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     
-    printf("Writer looking for space \n");
+    printf("Reader looking for a line \n");
 
     int num_readers = atoi(argv[1]);
     int sleeping = atoi(argv[2]);

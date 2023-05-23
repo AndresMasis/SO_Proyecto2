@@ -44,6 +44,22 @@ int main() {
         perror("Error al adjuntar la memoria compartida");
         return 1;
     }
+
+    struct shmid_ds shm_info;
+
+    // Obtener información sobre la memoria compartida
+    if (shmctl(shm_id, IPC_STAT, &shm_info) == -1) {
+        perror("Error al obtener información sobre la memoria compartida");
+        return;
+    }
+
+    // Imprimir los PIDs de los procesos que tienen acceso a la memoria compartida
+    printf("PIDs con acceso a la memoria compartida:\n");
+    for (int i = 0; i < shm_info.shm_nattch; i++) {
+        pid_t pid = shm_info.shm_perm.read[i].pid;
+        printf("\t %d\n", pid);
+    }
+
     
     // Leer la memoria compartida
     int i = 0;

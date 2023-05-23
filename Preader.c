@@ -56,7 +56,10 @@ void *reader(void *arg){
         	
 	writeData(pid2, 1, 1);
         // Bloqueo el acceso a la memoria compartida
-        semop(sem_id, &wait_operation1, 1);
+        semop(sem_id, &wait_operation1, 1);        
+        // Libero la memoria compartida
+        semop(sem_id, &signal_operation1, 1);
+
         // Leo en la memoria compartida
  	writeData(pid2, 0, 1);
             // Ver que linea de la memoria compartida tiene un mensaje
@@ -102,8 +105,6 @@ void *reader(void *arg){
                 if (linea == vectores)
 			linea = 0;
             }
-        // Libero la memoria compartida
-        semop(sem_id, &signal_operation1, 1);
         writeData(pid2, 2, 1);
         // Duerme el lector
         sleep(sleeping);

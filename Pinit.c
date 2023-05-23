@@ -125,7 +125,7 @@ int main(int argc, char *argv[]) {
     }
     
     // Crear el archivo de bitácora------------------------------------------------------------------------------
-    FILE *bitacora = fopen("bitacora.txt", "a");
+    FILE *bitacora = fopen("bitacora.txt", "w");
     if (bitacora == NULL) {
         perror("Error al abrir el archivo de bitácora");
         return 1;

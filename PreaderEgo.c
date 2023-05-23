@@ -28,10 +28,9 @@
 #define SHM_KEY 1234
 #define SEM_KEY 9999
 #define action "ReaderEgo"
-int reads = 0;
 
  // Mutex para sincronizar el acceso a la  y a la memoria compartida
-pthread_mutex_t list_mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t list_mutex2 = PTHREAD_MUTEX_INITIALIZER;
 .
 void *reader(void *arg){
     Settings * sett = (Settings *)arg;
@@ -126,7 +125,7 @@ void *reader(void *arg){
 
 int main(int argc, char *argv[]) {    
     if (argc != 4) {
-        printf("Uso: %s <num_readers> <sleeping> <reading>\n", argv[0]);
+        printf("Uso: %s <num_readers_ego> <sleeping> <reading>\n", argv[0]);
         return 1;
     }
     

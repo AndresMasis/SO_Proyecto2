@@ -23,6 +23,8 @@
 #include "Message.h"
 #include "Spy.h"
 
+
+
 #define SHM_KEY 1234
 #define SEM_KEY 9999
 #define action "Writer"
@@ -39,17 +41,19 @@ void *writer(void *arg){
 
     MSJ *msj = (MSJ *)malloc(sizeof(MSJ));
     msj->pid = (long)pthread_self();
-
+    long pid2 = (long)pthread_self();
     char *fecha;  // Suficiente espacio para "YYYY-MM-DD" + el carácter nulo
     char *hora;    // Suficiente espacio para "HH:MM:SS" + el carácter nulo
 
     while (true)
     {
-        writeData(msj->pid, 1, 0);
+    	writeData(pid2, 3, 0);
+    
+        writeData(pid2, 1, 0);
         // Bloqueo el acceso a la memoria compartida
         semop(sem_id, &wait_operation1, 1);
         // Escribo en la memoria compartida
-        writeData(msj->pid, 0, 0);
+        writeData(pid2, 0, 0);
 
             // Obtener y mostrar la fecha
             fecha = obtenerFecha();
@@ -95,7 +99,7 @@ void *writer(void *arg){
             }
         // Libero la memoria compartida
         semop(sem_id, &signal_operation1, 1);
-        writeData(msj->pid, 2, 0);
+        writeData(pid2, 2, 0);
         // Duerme el writer
         sleep(sleeping);
     }

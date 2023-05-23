@@ -79,7 +79,7 @@ int main(int argc, char *argv[]) {
 
 
     // Crear la memoria compartida para el SPY
-    int shm_id_spy = shmget(SHM_KEY, sizeof(SpyNode), IPC_CREAT | 0666);
+    int shm_id_spy = shmget(HEAD, sizeof(SpyNode) * 200, IPC_CREAT | 0666);
     if (shm_id_spy == -1) {
         perror("Error al crear la memoria compartida para SPY");
         return 1;
@@ -91,10 +91,12 @@ int main(int argc, char *argv[]) {
         return 1;
     }    
     // Inicializar la memoria compartida spy
-    shared_memory_spy[0].next = NULL;
-    shared_memory_spy[0].pid= 0;
-    shared_memory_spy[0].action= 0;
-    shared_memory_spy[0].type = 0;
+    for (int i = 0; i < 200; i++) {		
+	    shared_memory_spy[0].next = NULL;
+	    shared_memory_spy[0].pid= 0;
+	    shared_memory_spy[0].action= 0;
+	    shared_memory_spy[0].type = 0;
+    }
 
     // Desvincular la memoria compartida SPY
     if (shmdt(shared_memory_spy) == -1) {

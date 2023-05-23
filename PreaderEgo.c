@@ -24,7 +24,6 @@
 // SPY
 #include "Spy.h"
 
-
 #define SHM_KEY 1234
 #define SEM_KEY 9999
 #define action "Reader"
@@ -43,7 +42,6 @@ void *reader(void *arg){
 
     MSJ *msj = (MSJ *)malloc(sizeof(MSJ));
     msj->pid = (long)pthread_self();
-    long pid2 = (long)pthread_self();
 
     char *fecha;  // Suficiente espacio para "YYYY-MM-DD" + el carácter nulo
     char *hora;    // Suficiente espacio para "HH:MM:SS" + el carácter nulo
@@ -52,13 +50,12 @@ void *reader(void *arg){
     
     while (true)
     {        
-        writeData(pid2, 3, 1);
-        	
-	writeData(pid2, 1, 1);
         // Bloqueo el acceso a la memoria compartida
         semop(sem_id, &wait_operation1, 1);
+        // Libero la memoria compartida
+        semop(sem_id, &signal_operation1, 1);
         // Leo en la memoria compartida
- 	writeData(pid2, 0, 1);
+ 
             // Ver que linea de la memoria compartida tiene un mensaje
             int i = 0;
 	        MSJ *tmp_shared_memory = shared_memory;	    
@@ -102,9 +99,6 @@ void *reader(void *arg){
                 if (linea == vectores)
 			linea = 0;
             }
-        // Libero la memoria compartida
-        semop(sem_id, &signal_operation1, 1);
-        writeData(pid2, 2, 1);
         // Duerme el lector
         sleep(sleeping);
     }
@@ -119,7 +113,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     
-    printf("Reader looking for a line \n");
+    printf("Writer looking for space \n");
 
     int num_readers = atoi(argv[1]);
     int sleeping = atoi(argv[2]);

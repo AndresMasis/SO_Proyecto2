@@ -22,96 +22,79 @@ typedef struct SpyNode {
 pthread_mutex_t list_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 void printData() {
-    // Obtener el ID de la memoria compartida SPY
-    int shm_id = shmget(HEAD, sizeof(SpyNode), 0666);
+
+    // Obtener el ID de la memoria compartida SPY--------
+    int shm_id = shmget(HEAD, 0, 0);
     if (shm_id == -1) {
         perror("Error al obtener el ID de la memoria compartida SPY");
-        return;
-    }
-
-    // Adjuntar la memoria compartida SPY
+        return 1;
+    }    
     SpyNode *head = (SpyNode *)shmat(shm_id, NULL, 0);
     if (head == (SpyNode *)-1) {
         perror("Error al adjuntar la memoria compartida SPY");
-        return;
+        return 1;
     }
-
-    // Bloquear el mutex antes de acceder a la lista enlazada
-    pthread_mutex_lock(&list_mutex);
-
-    SpyNode* currentNode = head;
-    char* actions[] = {"Memoria", "Bloqueado", "Durmiendo"};
+    
+//    SpyNode* currentNode = head[0].next;
+    char* actions[] = {"Memoria", "Bloqueado", "Durmiendo","Acceso a Memoria compartida","Sin acceso a Memoria compartida"};
     char* types[] = {"Writer", "Reader", "Reader Egoista"};
 
-    while (currentNode != NULL) {
-        printf("PID: %ld, Action: %s, Type: %s\n", currentNode->pid, actions[currentNode->action], types[currentNode->type]);
-        currentNode = currentNode->next;
+    int count = 1;
+    while (count < 200) {
+    	
+    	if(head[count].pid == 0)
+    		break;
+        printf("PID: %ld, Type: %s, Action: %s\n", head[count].pid, types[head[count].type], actions[head[count].action]);
+        count++;
     }
-
-    // Desbloquear el mutex después de terminar de acceder a la lista enlazada
-    pthread_mutex_unlock(&list_mutex);
-
-    // Desadjuntar la memoria compartida
-    shmdt(head);
+    
+    if(count == 1)
+	printf(" Sin acciones todavia \n");
 }
 
 void writeData(long pid, int action, int type) {
-    // Obtener el ID de la memoria compartida SPY
-    int shm_id = shmget(HEAD, sizeof(SpyNode), 0666);
+    // Obtener el ID de la memoria compartida SPY--------
+    int shm_id = shmget(HEAD, 0, 0);
     if (shm_id == -1) {
         perror("Error al obtener el ID de la memoria compartida SPY");
-        return;
-    }
-
-    // Adjuntar la memoria compartida SPY
+        return 1;
+    }    
     SpyNode *head = (SpyNode *)shmat(shm_id, NULL, 0);
     if (head == (SpyNode *)-1) {
         perror("Error al adjuntar la memoria compartida SPY");
-        return;
+        return 1;
     }
 
     // Bloquear el mutex antes de acceder a la lista enlazada
     pthread_mutex_lock(&list_mutex);
-
-    SpyNode* currentNode = head;
-    SpyNode* prevNode = NULL;
+   
     int pidExists = 0;
-
+    int count  = 1;
     // Buscar si el PID ya existe en la lista enlazada
-    while (currentNode != NULL) {
-        if (currentNode->pid == pid) {
+    while (count < 200) {
+        if (head[count].pid == pid) {
             pidExists = 1;
             break;
         }
-        prevNode = currentNode;
-        currentNode = currentNode->next;
+        else if(head[count].pid == 0) {
+            break;
+        }
+        count++;
     }
-
     // Si el PID existe, sobrescribir los valores
     if (pidExists) {
-        currentNode->action = action;
-        currentNode->type = type;
+        head[count].action = action;
+        head[count].type = type;
     } else {
-        // Si el PID no existe, crear un nuevo nodo
-        SpyNode* newNode = (SpyNode*)malloc(sizeof(SpyNode));
-        newNode->pid = pid;
-        newNode->action = action;
-        newNode->type = type;
-        newNode->next = NULL;
-
-        // Insertar el nuevo nodo al final de la lista enlazada
-        if (prevNode != NULL) {
-            prevNode->next = newNode;
-        } else {
-            head = newNode;
-        }
+        head[count].pid = pid;
+        head[count].action = action;
+        head[count].type = type;
+        head[count].next = NULL;
     }
+
 
     // Desbloquear el mutex después de terminar de acceder a la lista enlazada
     pthread_mutex_unlock(&list_mutex);
-
-    // Desadjuntar la memoria compartida
-    shmdt(head);
 }
 
 #endif

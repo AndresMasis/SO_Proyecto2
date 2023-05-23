@@ -123,7 +123,7 @@ void *readerEgo(void *arg){
         semop(sem_id, &signal_operation1, 1);   
         
         // Libero el acceso al egoista
-        semop(sem_id, &signal_operation2, 1);   
+        semop(sem_id, &signal_operation2, 0);   
 
         writeData(pid2, 2, 2);
         // Duerme el lector

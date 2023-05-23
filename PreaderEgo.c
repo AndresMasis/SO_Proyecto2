@@ -75,14 +75,14 @@ void *readerEgo(void *arg){
  
             for (int j = 0; i < vectores; i++) {
                 if (tmp_shared_memory[i].pid != -1) {
-                    lineas[j] = tmp_shared_memory[i].pid; // Guardar valor en la lista
+                    lineasR[j] = tmp_shared_memory[i].pid; // Guardar valor en la lista
                     j++;
                 }
             }
             // Obtener un valor aleatorio de la lista
             srand(time(NULL)); // Inicializar la semilla del generador de números aleatorios
             int indice_aleatorio = rand() % vectores;
-            i = lineas[indice_aleatorio];
+            i = lineasR[indice_aleatorio];
 
             if (i == vectores)
             {

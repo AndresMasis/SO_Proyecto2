@@ -76,8 +76,7 @@ void writeData(long pid, int action, int type) {
             pidExists = 2;
         }
         else if( head[count].pid == pid && head[count].type == 4) {
-            pidExists = 1;
-            break;
+            pidExists = 2;
         }
         else if(head[count].pid == pid) {
             pidExists = 1;

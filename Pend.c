@@ -72,6 +72,22 @@ int main() {
     system("killall Pwriter");
     system("killall PreaderEgo");
 
+    FILE *archivo;
+    char linea[200];
+
+    // Abrir el archivo en modo de lectura
+    archivo = fopen("bitacora.txt", "r");
+    if (archivo == NULL) {
+        printf("No se pudo abrir el archivo.\n");
+        return 1;
+    }
+    // Leer y mostrar cada línea del archivo
+    while (fgets(linea, sizeof(linea), archivo) != NULL) {
+        printf("%s", linea);
+    }
+    // Cerrar el archivo
+    fclose(archivo);
+
     
     // Cerrar el archivo de bitácora------------------------------------------------------------------------------
     FILE *bitacora = fopen("bitacora.txt", "a");

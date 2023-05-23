@@ -81,7 +81,6 @@ int main() {
     printf("\n\t #PIDs con acceso a la memoria compartida\n"); 
     for (int i = 0; i < shm_info.shm_nattch; i++) { 
         pid_t pid = shm_info.shm_cpid; 
-       
         printf("\t - %d\n", pid); 
         
     }

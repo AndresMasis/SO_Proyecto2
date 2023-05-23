@@ -72,7 +72,10 @@ void writeData(long pid, int action, int type) {
     int count  = 1;
     // Buscar si el PID ya existe en la lista enlazada
     while (count < 200) {
-        if (head[count].pid == pid) {
+        if (head[count].pid == pid && head[count].type == 3) || (head[count].pid == pid && head[count].type == 4){
+            pidExists = 2;
+        }
+        else if(head[count].pid == pid) {
             pidExists = 1;
             break;
         }
@@ -85,7 +88,8 @@ void writeData(long pid, int action, int type) {
     if (pidExists) {
         head[count].action = action;
         head[count].type = type;
-    } else {
+    }
+    else {
         head[count].pid = pid;
         head[count].action = action;
         head[count].type = type;

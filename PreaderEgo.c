@@ -79,7 +79,6 @@ void *readerEgo(void *arg){
                 i++;
             }
             
-            printf("Line to DELETE %d\n", i);
             if (j == 0)
             {
                 printf("\e[92;1m: El reader-ego %ld no encuentra nada que leer \n", msj->pid);
@@ -88,8 +87,9 @@ void *readerEgo(void *arg){
             {
                 // Obtener un valor aleatorio de la lista
                 srand(time(NULL)); // Inicializar la semilla del generador de números aleatorios
-                int indice_aleatorio = rand() % vectores;
+                int indice_aleatorio = rand() % j;
                 i = lineasR[indice_aleatorio];
+
                 // Obtener y mostrar la fecha
                 fecha = obtenerFecha();
                 // Obtener y mostrar la hora

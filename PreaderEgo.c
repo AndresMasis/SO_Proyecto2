@@ -31,8 +31,8 @@
 
  // Mutex para sincronizar el acceso a la  y a la memoria compartida
 pthread_mutex_t list_mutex2 = PTHREAD_MUTEX_INITIALIZER;
-.
-void *reader(void *arg){
+
+void *readerEgo(void *arg){
     Settings * sett = (Settings *)arg;
     int sleeping = sett->sleeping;
     int reading = sett->actor;
@@ -166,7 +166,7 @@ int main(int argc, char *argv[]) {
     while ( i < num_readers)
     {
         pthread_t reader_thread;
-        if(pthread_create(&reader_thread, NULL, &reader, (void*)sett) != 0){
+        if(pthread_create(&reader_thread, NULL, &readerEgo, (void*)sett) != 0){
             printf("\e[91;103;1m Error pthread reader\e[0m\n");
             return EXIT_FAILURE;
         }

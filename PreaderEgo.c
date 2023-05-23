@@ -42,6 +42,9 @@ void *readerEgo(void *arg){
     struct sembuf wait_operation1 = {0, -1, 0};  // Operación de espera 
     struct sembuf signal_operation1 = {0, 1, 0};  // Operación de señal 
 
+    struct sembuf wait_operation2 = {1, -1, 0};  // Operación de espera ego
+    struct sembuf signal_operation2 = {1, 0, 0};  // Operación de señal ego
+
     MSJ *msj = (MSJ *)malloc(sizeof(MSJ));
     msj->pid = (long)pthread_self();
     long pid2 = (long)pthread_self();
@@ -56,6 +59,9 @@ void *readerEgo(void *arg){
 	writeData(pid2, 1, 2);
         // Bloqueo el acceso a la memoria compartida
         semop(sem_id, &wait_operation1, 1);       
+
+        // Bloqueo el acceso egoista
+        semop(sem_id, &wait_operation2, 1);      
 
             // Leo en la memoria compartida
  	        writeData(pid2, 0, 2);
@@ -115,6 +121,10 @@ void *readerEgo(void *arg){
           
         // Libero la memoria compartida
         semop(sem_id, &signal_operation1, 1);   
+        
+        // Libero el acceso al egoista
+        semop(sem_id, &signal_operation2, 1);   
+
         writeData(pid2, 2, 2);
         // Duerme el lector
         sleep(sleeping);

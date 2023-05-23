@@ -85,7 +85,7 @@ void *reader(void *arg){
                 linea = i;
                 
                 msj->pid = tmp_shared_memory[i].pid;
-	        msj->linea = tmp_shared_memory[i].linea;
+	            msj->linea = tmp_shared_memory[i].linea;
                 strcpy(msj->fecha, tmp_shared_memory[i].fecha);
                 strcpy(msj->hora, tmp_shared_memory[i].hora);
 
@@ -111,7 +111,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     
-    printf("Writer looking for space \n");
+    printf("Reader looking for space \n");
 
     int num_readers = atoi(argv[1]);
     int sleeping = atoi(argv[2]);
